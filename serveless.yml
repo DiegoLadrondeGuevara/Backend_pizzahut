@@ -1,0 +1,202 @@
+org: diegoladrondeg
+service: api-gestion-pedidos
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 1024
+  timeout: 60
+
+  iam:
+    role: arn:aws:iam::804190897568:role/LabRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:Query
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: "*"
+
+  environment:
+    DYNAMODB_TABLE_USERS: ${self:custom.usersTableName.${self:provider.stage}}
+    DYNAMODB_TABLE_PEDIDOS: ${self:custom.pedidosTableName.${self:provider.stage}}
+    DYNAMODB_TABLE_PRODUCTOS: ${self:custom.productosTableName.${self:provider.stage}}
+    DYNAMODB_TABLE_ESTADOS: ${self:custom.estadoPedidosTableName.${self:provider.stage}}
+    DYNAMODB_TABLE_LOGS: ${self:custom.logsTableName.${self:provider.stage}}
+    STAGE: ${self:provider.stage}
+
+# --- Funciones Lambda ---
+functions:
+  # Funciones HTTP para CRUD
+  createUser:
+    handler: src/create_user.lambda_handler
+    events:
+      - http:
+          path: /users
+          method: post
+          cors: true
+
+  createPedido:
+    handler: src/create_pedido.lambda_handler
+    events:
+      - http:
+          path: /pedidos
+          method: post
+          cors: true
+
+  updateEstadoPedido:
+    handler: src/update_estado_pedido.lambda_handler
+    events:
+      - http:
+          path: /pedidos/{pedido_id}/estado
+          method: put
+          cors: true
+
+  createLog:
+    handler: src/create_log.lambda_handler
+    events:
+      - http:
+          path: /logs
+          method: post
+          cors: true
+
+  # Funciones WebSocket para notificar a clientes y restaurantes en tiempo real
+  onConnect:
+    handler: src/on_connect.lambda_handler
+    events:
+      - websocket:
+          route: $connect
+
+  onDisconnect:
+    handler: src/on_disconnect.lambda_handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  notifyPedidoUpdate:
+    handler: src/notify_pedido_update.lambda_handler
+    events:
+      - websocket:
+          route: /update-pedido
+
+# --- Nombres Personalizados (Custom) ---
+custom:
+  usersTableName:
+    dev: ${self:service}-dev-users
+    test: ${self:service}-test-users
+    prod: ${self:service}-prod-users
+
+  pedidosTableName:
+    dev: ${self:service}-dev-pedidos
+    test: ${self:service}-test-pedidos
+    prod: ${self:service}-prod-pedidos
+
+  productosTableName:
+    dev: ${self:service}-dev-productos
+    test: ${self:service}-test-productos
+    prod: ${self:service}-prod-productos
+
+  estadoPedidosTableName:
+    dev: ${self:service}-dev-estado-pedidos
+    test: ${self:service}-test-estado-pedidos
+    prod: ${self:service}-prod-estado-pedidos
+
+  logsTableName:
+    dev: ${self:service}-dev-logs
+    test: ${self:service}-test-logs
+    prod: ${self:service}-prod-logs
+
+# --- Recursos Adicionales (DynamoDB y WebSocket) ---
+resources:
+  Resources:
+    # Tablas DynamoDB
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.usersTableName.${self:provider.stage}}
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    PedidosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.pedidosTableName.${self:provider.stage}}
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: pedido_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: pedido_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    ProductosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.productosTableName.${self:provider.stage}}
+        AttributeDefinitions:
+          - AttributeName: producto_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: producto_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    EstadoPedidosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.estadoPedidosTableName.${self:provider.stage}}
+        AttributeDefinitions:
+          - AttributeName: pedido_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pedido_id
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    LogsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.logsTableName.${self:provider.stage}}
+        AttributeDefinitions:
+          - AttributeName: log_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: log_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # API Gateway WebSocket
+    ApiGatewayWebSocket:
+      Type: AWS::ApiGatewayV2::Api
+      Properties:
+        Name: ${self:service}-ws
+        ProtocolType: WEBSOCKET
+        RouteSelectionExpression: $request.body.action
+
+    # Permitir a Lambda manejar WebSocket
+    WebSocketApiGatewayInvokeRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: "*"
