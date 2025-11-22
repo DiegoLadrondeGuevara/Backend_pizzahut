@@ -66,7 +66,7 @@ def lambda_handler(event, context):
         table.put_item(
             Item={
                 'restaurant_id': restaurant_id,  # Usamos 'restaurant_id' como clave primaria
-                'email': email,
+                'email': email,  # email como atributo adicional
                 'nombre_restaurante': nombre_restaurante,
                 'direccion': direccion,
                 'distrito': distrito,
@@ -98,5 +98,5 @@ def lambda_handler(event, context):
         return {
             'statusCode': 500,
             'headers': cors_headers,
-            'body': json.dumps({'error': 'Error interno del servidor', 'details': str(e)})
+            'body': json.dumps({'error': 'Error interno del servidor', 'details': str(e)}),
         }
