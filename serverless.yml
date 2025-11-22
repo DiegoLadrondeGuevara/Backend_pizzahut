@@ -147,7 +147,7 @@ custom:
 # --- Recursos Adicionales (DynamoDB y WebSocket) ---
 resources:
   Resources:
-    # Tablas DynamoDB
+    # Tabla DynamoDB para Usuarios
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -160,6 +160,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
+    # Tabla DynamoDB para Pedidos
     PedidosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -176,6 +177,7 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
+    # Tabla DynamoDB para Productos
     ProductosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -188,6 +190,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
+    # Tabla DynamoDB para Estado de Pedidos
     EstadoPedidosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -204,6 +207,7 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
+    # Tabla DynamoDB para Logs
     LogsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -216,6 +220,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
+    # Tabla DynamoDB para Connections
     ConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -228,7 +233,8 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    RestaurantesTable:  # Nueva tabla para Restaurantes con GSI para 'email'
+    # Tabla DynamoDB para Restaurantes con índice secundario global para buscar por email
+    RestaurantesTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
