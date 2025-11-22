@@ -8,7 +8,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   memorySize: 1024
   timeout: 60
-  role: arn:aws:iam::049376646199:role/LabRole
+  role: arn:aws:iam::010160578866:role/LabRole
 
   environment:
     DYNAMODB_TABLE_USERS: ${self:custom.usersTableName.${self:provider.stage}}
