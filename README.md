@@ -1,4 +1,4 @@
-Claro, aquí te dejo el **README actualizado** con los cambios de la arquitectura híbrida (WebSockets + REST) y la nueva tabla de **conexiones de WebSocket** que se agregó para manejar la comunicación en tiempo real entre clientes y restaurantes:
+Claro, a continuación te proporciono el **README actualizado** con los cambios solicitados para incluir la **dirección del restaurante**, **distrito**, **departamento** y **número de teléfono**. También, he actualizado la **función `registerRestaurant`** para reflejar estos nuevos atributos.
 
 ---
 
@@ -9,11 +9,12 @@ Este documento describe la estructura de la base de datos diseñada para un sist
 ## **Tabla de Contenido**
 
 1. [Usuarios (Users)](#tabla-users)
-2. [Pedidos (Pedidos)](#tabla-pedidos)
-3. [Productos (Productos)](#tabla-productos)
-4. [Estados de Pedidos (Estado_Pedidos)](#tabla-estado_pedidos)
-5. [Logs de Actividad (Logs)](#tabla-logs)
-6. [Conexiones WebSocket (Conexiones)](#tabla-conexiones)
+2. [Restaurantes (Restaurantes)](#tabla-restaurantes)
+3. [Pedidos (Pedidos)](#tabla-pedidos)
+4. [Productos (Productos)](#tabla-productos)
+5. [Estados de Pedidos (Estado_Pedidos)](#tabla-estado_pedidos)
+6. [Logs de Actividad (Logs)](#tabla-logs)
+7. [Conexiones WebSocket (Conexiones)](#tabla-conexiones)
 
 ---
 
@@ -40,7 +41,37 @@ La tabla de **Usuarios** almacena información básica sobre los usuarios, inclu
 
 ---
 
-## **2. Tabla `Pedidos` (Pedidos)**
+## **2. Tabla `Restaurantes` (Restaurantes)**
+
+La tabla de **Restaurantes** almacena información específica sobre cada restaurante, incluyendo su nombre, email, ubicación, teléfono y detalles de autenticación.
+
+### **Definición de la tabla `Restaurantes`**:
+
+| Atributo             | Tipo      | Descripción                                                  |
+| -------------------- | --------- | ------------------------------------------------------------ |
+| `restaurant_id`      | UUID (PK) | Identificador único del restaurante (clave primaria).        |
+| `email`              | string    | Correo electrónico del restaurante (único).                  |
+| `nombre_restaurante` | string    | Nombre del restaurante.                                      |
+| `direccion`          | string    | Dirección del restaurante.                                   |
+| `distrito`           | string    | Distrito donde se ubica el restaurante.                      |
+| `departamento`       | string    | Departamento donde se encuentra el restaurante.              |
+| `telefono`           | string    | Número de teléfono del restaurante.                          |
+| `password`           | string    | Contraseña encriptada para la autenticación del restaurante. |
+| `token`              | string    | Token de autenticación generado para el restaurante.         |
+| `created_at`         | datetime  | Fecha y hora en que se registró el restaurante.              |
+
+### **Definición de clave primaria**:
+
+* **Partition Key:** `restaurant_id` (UUID)
+* **Sort Key:** No se necesita.
+
+### **Índices Secundarios (opcional)**:
+
+* **GSI** con `email` como partition key para obtener fácilmente un restaurante por su correo electrónico.
+
+---
+
+## **3. Tabla `Pedidos` (Pedidos)**
 
 La tabla de **Pedidos** almacena la información relacionada con los pedidos realizados por los usuarios. Cada pedido está asociado a un restaurante (`tenant_id`).
 
@@ -67,7 +98,7 @@ La tabla de **Pedidos** almacena la información relacionada con los pedidos rea
 
 ---
 
-## **3. Tabla `Productos` (Productos)**
+## **4. Tabla `Productos` (Productos)**
 
 La tabla de **Productos** contiene la información de los productos disponibles en el restaurante, como pizzas, bebidas, combinados, etc.
 
@@ -93,7 +124,7 @@ La tabla de **Productos** contiene la información de los productos disponibles 
 
 ---
 
-## **4. Tabla `Estado_Pedidos` (Estados de los Pedidos)**
+## **5. Tabla `Estado_Pedidos` (Estados de los Pedidos)**
 
 La tabla de **Estados de Pedidos** almacena los cambios de estado de cada pedido, como cuando el pedido está en preparación, listo para entregar, etc.
 
@@ -117,7 +148,7 @@ La tabla de **Estados de Pedidos** almacena los cambios de estado de cada pedido
 
 ---
 
-## **5. Tabla `Logs` (Logs de Actividad)**
+## **6. Tabla `Logs` (Logs de Actividad)**
 
 La tabla de **Logs** almacena las acciones realizadas por los usuarios en el sistema, como iniciar sesión, crear un pedido, etc.
 
@@ -140,13 +171,16 @@ La tabla de **Logs** almacena las acciones realizadas por los usuarios en el sis
 
 ### **Índices Secundarios (opcional)**:
 
-* **GSI** con `accion` como partition key si deseas consultar todos los logs de una acción específica.
+* **GSI** con `accion` como partition key si deseas consultar todos los logs de
+
+
+una acción específica.
 
 ---
 
-## **6. Tabla `Conexiones` (Conexiones WebSocket)**
+## **7. Tabla `Conexiones` (Conexiones WebSocket)**
 
-Esta nueva tabla almacena las conexiones activas de los clientes que están conectados mediante WebSockets. Permite notificar a los clientes sobre eventos importantes en tiempo real, como actualizaciones de pedidos.
+Esta tabla almacena las conexiones activas de los clientes que están conectados mediante WebSockets. Permite notificar a los clientes sobre eventos importantes en tiempo real, como actualizaciones de pedidos.
 
 ### **Definición de la tabla `Conexiones`**:
 
@@ -164,5 +198,3 @@ Esta nueva tabla almacena las conexiones activas de los clientes que están cone
 ### **Índices Secundarios (opcional)**:
 
 * **GSI** con `user_id` como partition key para obtener todas las conexiones de un usuario específico.
-
----
