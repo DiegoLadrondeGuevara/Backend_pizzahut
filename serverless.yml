@@ -228,14 +228,26 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    RestaurantesTable:  # Nueva tabla para Restaurantes
+    RestaurantesTable:  # Nueva tabla para Restaurantes con GSI para 'email'
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
         AttributeDefinitions:
           - AttributeName: restaurant_id
             AttributeType: S
+          - AttributeName: email
+            AttributeType: S  # Asegúrate de agregar 'email' para el GSI
         KeySchema:
           - AttributeName: restaurant_id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex  # Índice para buscar por 'email'
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5

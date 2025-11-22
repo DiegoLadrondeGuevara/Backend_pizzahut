@@ -26,6 +26,7 @@ def lambda_handler(event, context):
     }
     
     try:
+        # Parseo del body
         body = json.loads(event['body']) if isinstance(event.get('body'), str) else event.get('body', {})
         
         email = body.get('email')
@@ -36,6 +37,7 @@ def lambda_handler(event, context):
         departamento = body.get('departamento')
         telefono = body.get('telefono')
         
+        # Validación de campos requeridos
         if not email or not nombre_restaurante or not password or not direccion or not distrito or not departamento or not telefono:
             return {
                 'statusCode': 400,
@@ -43,8 +45,8 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Todos los campos son requeridos'})
             }
         
-        # Verificar si el restaurante ya está registrado
-        response = table.get_item(Key={'email': email})
+        # Verificar si el restaurante ya está registrado usando 'email'
+        response = table.get_item(Key={'email': email})  # Utilizando 'email' para buscar el restaurante
         if 'Item' in response:
             return {
                 'statusCode': 409,
@@ -52,15 +54,15 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'El restaurante ya está registrado'})
             }
         
-        # Crear nuevo restaurante
-        restaurant_id = str(uuid.uuid4())
-        hashed_password = hash_password(password)
-        token = generate_simple_token()
+        # Crear un nuevo restaurante
+        restaurant_id = str(uuid.uuid4())  # Generamos un ID único para el restaurante
+        hashed_password = hash_password(password)  # Hasheamos la contraseña
+        token = generate_simple_token()  # Generamos un token único
         
-        # Guardar restaurante en DynamoDB
+        # Guardar el restaurante en la tabla de DynamoDB
         table.put_item(
             Item={
-                'restaurant_id': restaurant_id,
+                'restaurant_id': restaurant_id,  # Usamos 'restaurant_id' como clave primaria
                 'email': email,
                 'nombre_restaurante': nombre_restaurante,
                 'direccion': direccion,
@@ -73,6 +75,7 @@ def lambda_handler(event, context):
             }
         )
         
+        # Responder con el éxito de la operación
         return {
             'statusCode': 201,
             'headers': cors_headers,
