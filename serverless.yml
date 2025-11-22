@@ -24,7 +24,7 @@ provider:
 functions:
   # Funciones HTTP para CRUD
   createLog:
-    handler: src/create_log.lambda_handler
+    handler: src/createLog.lambda_handler
     events:
       - http:
           path: /logs
@@ -32,7 +32,7 @@ functions:
           cors: true
 
   createPedido:
-    handler: src/create_pedido.lambda_handler
+    handler: src/createPedido.lambda_handler
     events:
       - http:
           path: /pedidos
@@ -40,7 +40,7 @@ functions:
           cors: true
 
   getEstadoPedido:
-    handler: src/get_estado_pedido.lambda_handler
+    handler: src/getEstadoPedido.lambda_handler
     events:
       - http:
           path: /pedidos/{pedido_id}/estado
@@ -48,7 +48,7 @@ functions:
           cors: true
 
   listPedidosActivos:
-    handler: src/list_pedidos_activos.lambda_handler
+    handler: src/listPedidosActivos.lambda_handler
     events:
       - http:
           path: /pedidos/activos
@@ -74,7 +74,7 @@ functions:
 
   # Funciones HTTP para restaurantes
   registerRestaurant:
-    handler: src/register_restaurant.lambda_handler
+    handler: src/registerRestaurant.lambda_handler
     events:
       - http:
           path: /restaurantes/register
@@ -82,7 +82,7 @@ functions:
           cors: true
 
   loginRestaurant:
-    handler: src/login_restaurant.lambda_handler
+    handler: src/loginRestaurant.lambda_handler
     events:
       - http:
           path: /restaurantes/login
@@ -91,7 +91,7 @@ functions:
 
   # Función para notificar cambios de estado de pedido
   notifyPedidoEstado:
-    handler: src/notify_pedido_estado.lambda_handler
+    handler: src/notifyPedidoEstado.lambda_handler
     events:
       - http:
           path: /pedidos/{pedido_id}/estado
@@ -100,7 +100,7 @@ functions:
 
   # Funciones para manejar el estado de un pedido
   updateEstadoPedido:
-    handler: src/update_estado_pedido.lambda_handler
+    handler: src/updateEstadoPedido.lambda_handler
     events:
       - http:
           path: /pedidos/{pedido_id}/estado
