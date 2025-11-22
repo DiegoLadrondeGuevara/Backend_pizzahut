@@ -6,8 +6,12 @@ from datetime import datetime
 import secrets
 import os
 
+# Define los roles como constantes
+USER_ROLE = "user"
+ADMIN_ROLE = "admin"  # Si quieres incluir más roles, puedes agregarlos aquí
+
 # Lee el nombre de la tabla de las variables de entorno
-DYNAMODB_TABLE_NAME = os.environ.get('DYNAMODB_TABLE_NAME', 'UsersTable')
+DYNAMODB_TABLE_NAME = 'api-gestion-pedidos-dev-users'
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
@@ -25,7 +29,7 @@ def lambda_handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'  # Habilitado por el API Gateway, pero se incluye por seguridad
     }
-    
+
     try:
         # Parse del body
         body = json.loads(event['body']) if isinstance(event.get('body'), str) else event.get('body', {})
@@ -60,6 +64,9 @@ def lambda_handler(event, context):
         hashed_password = hash_password(password)
         token = generate_simple_token()
         
+        # El rol "user" se asigna automáticamente
+        role = USER_ROLE  # Puedes modificar esto si deseas permitir asignar diferentes roles
+        
         # Guardar en DynamoDB
         table.put_item(
             Item={
@@ -68,6 +75,7 @@ def lambda_handler(event, context):
                 'username': username,
                 'password': hashed_password,
                 'token': token,  # Este token se puede usar para conectar el WebSocket
+                'role': role,  # Añadir el rol de usuario aquí
                 's3_folder': f'users/{user_id}/',
                 'created_at': datetime.utcnow().isoformat()
             }
@@ -82,7 +90,8 @@ def lambda_handler(event, context):
                 'user': {
                     'user_id': user_id,
                     'email': email,
-                    'username': username
+                    'username': username,
+                    'role': role  # Devuelves el rol junto con la respuesta
                 }
             })
         }

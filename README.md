@@ -194,3 +194,4 @@ Esta tabla almacena las conexiones activas de los clientes que están conectados
 ### **Índices Secundarios (opcional)**:
 
 * **GSI** con `user_id` como partition key para obtener todas las conexiones de un usuario específico.
+
