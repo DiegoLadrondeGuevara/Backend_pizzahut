@@ -67,8 +67,8 @@ def lambda_handler(event, context):
                 'email': email,
                 'username': username,
                 'password': hashed_password,
-                'token': token,
-                's3_folder': f'users/{user_id}/',  # Carpeta en S3 para las imágenes del usuario
+                'token': token,  # Este token se puede usar para conectar el WebSocket
+                's3_folder': f'users/{user_id}/',
                 'created_at': datetime.utcnow().isoformat()
             }
         )
@@ -78,7 +78,7 @@ def lambda_handler(event, context):
             'headers': cors_headers,
             'body': json.dumps({
                 'message': 'Usuario registrado exitosamente',
-                'token': token,
+                'token': token,  # Devuelves el token que el frontend usará para la conexión WebSocket
                 'user': {
                     'user_id': user_id,
                     'email': email,

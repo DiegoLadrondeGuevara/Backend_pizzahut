@@ -76,7 +76,7 @@ def lambda_handler(event, context):
             'headers': cors_headers,
             'body': json.dumps({
                 'message': 'Login exitoso',
-                'token': new_token,
+                'token': new_token,  # Este token se usa para la autenticación WebSocket
                 'user': {
                     'user_id': user.get('user_id'),
                     'email': user.get('email'),
