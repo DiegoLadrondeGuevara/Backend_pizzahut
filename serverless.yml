@@ -8,17 +8,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   memorySize: 1024
   timeout: 60
-
-  iam:
-    role: arn:aws:iam::049376646199:role/LabRole
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-          - dynamodb:Query
-          - dynamodb:GetItem
-          - dynamodb:UpdateItem
-        Resource: "*"
+  role: arn:aws:iam::049376646199:role/LabRole
 
   environment:
     DYNAMODB_TABLE_USERS: ${self:custom.usersTableName.${self:provider.stage}}
@@ -33,11 +23,11 @@ provider:
 # --- Funciones Lambda ---
 functions:
   # Funciones HTTP para CRUD
-  createUser:
-    handler: src/create_user.lambda_handler
+  createLog:
+    handler: src/create_log.lambda_handler
     events:
       - http:
-          path: /users
+          path: /logs
           method: post
           cors: true
 
@@ -49,28 +39,37 @@ functions:
           method: post
           cors: true
 
-  updateEstadoPedido:
-    handler: src/update_estado_pedido.lambda_handler
-    events:
-      - http:
-          path: /pedidos/{pedido_id}/estado
-          method: put
-          cors: true
-
-  createLog:
-    handler: src/create_log.lambda_handler
-    events:
-      - http:
-          path: /logs
-          method: post
-          cors: true
-
   getEstadoPedido:
     handler: src/get_estado_pedido.lambda_handler
     events:
       - http:
           path: /pedidos/{pedido_id}/estado
           method: get
+          cors: true
+
+  listPedidosActivos:
+    handler: src/list_pedidos_activos.lambda_handler
+    events:
+      - http:
+          path: /pedidos/activos
+          method: get
+          cors: true
+
+  # Funciones HTTP para autenticación
+  login:
+    handler: src/login.lambda_handler
+    events:
+      - http:
+          path: /login
+          method: post
+          cors: true
+
+  register:
+    handler: src/register.lambda_handler
+    events:
+      - http:
+          path: /register
+          method: post
           cors: true
 
   # Funciones HTTP para restaurantes
@@ -90,36 +89,23 @@ functions:
           method: post
           cors: true
 
-  # Funciones WebSocket para notificar a clientes y restaurantes en tiempo real
-  onConnect:
-    handler: src/on_connect.lambda_handler
+  # Función para notificar cambios de estado de pedido
+  notifyPedidoEstado:
+    handler: src/notify_pedido_estado.lambda_handler
     events:
-      - websocket:
-          route: $connect
+      - http:
+          path: /pedidos/{pedido_id}/estado
+          method: put
+          cors: true
 
-  onDisconnect:
-    handler: src/on_disconnect.lambda_handler
+  # Funciones para manejar el estado de un pedido
+  updateEstadoPedido:
+    handler: src/update_estado_pedido.lambda_handler
     events:
-      - websocket:
-          route: $disconnect
-
-  onConnectRestaurant:
-    handler: src/on_connect_restaurant.lambda_handler
-    events:
-      - websocket:
-          route: $connect
-
-  onDisconnectRestaurant:
-    handler: src/on_disconnect_restaurant.lambda_handler
-    events:
-      - websocket:
-          route: $disconnect
-
-  notifyPedidoUpdate:
-    handler: src/notify_pedido_update.lambda_handler
-    events:
-      - websocket:
-          route: /update-pedido
+      - http:
+          path: /pedidos/{pedido_id}/estado
+          method: put
+          cors: true
 
 # --- Nombres Personalizados (Custom) ---
 custom:
@@ -253,23 +239,3 @@ resources:
           - AttributeName: restaurant_id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-
-    # API Gateway WebSocket
-    ApiGatewayWebSocket:
-      Type: AWS::ApiGatewayV2::Api
-      Properties:
-        Name: ${self:service}-ws
-        ProtocolType: WEBSOCKET
-        RouteSelectionExpression: $request.body.action
-
-    # Permitir a Lambda manejar WebSocket
-    WebSocketApiGatewayInvokeRole:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - lambda:InvokeFunction
-              Resource: "*"
