@@ -147,7 +147,7 @@ custom:
 # --- Recursos Adicionales (DynamoDB y WebSocket) ---
 resources:
   Resources:
-    # Tabla DynamoDB para Usuarios
+    # Tablas DynamoDB
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -160,7 +160,6 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Pedidos
     PedidosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -177,7 +176,6 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Productos
     ProductosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -190,7 +188,6 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Estado de Pedidos
     EstadoPedidosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -207,7 +204,6 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Logs
     LogsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -220,7 +216,6 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Connections
     ConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -233,8 +228,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla DynamoDB para Restaurantes con índice secundario global para buscar por email
-    RestaurantesTable:
+    RestaurantesTable:  # Nueva tabla para Restaurantes sin índices secundarios
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
@@ -242,18 +236,8 @@ resources:
           - AttributeName: restaurant_id
             AttributeType: S
           - AttributeName: email
-            AttributeType: S  # Asegúrate de agregar 'email' para el GSI
+            AttributeType: S  # Se mapea 'email' como un String
         KeySchema:
           - AttributeName: restaurant_id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: EmailIndex  # Índice para buscar por 'email'
-            KeySchema:
-              - AttributeName: email
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5

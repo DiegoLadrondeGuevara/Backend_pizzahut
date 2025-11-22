@@ -24,11 +24,11 @@ def lambda_handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'  # Permitir acceso desde cualquier origen
     }
-    
+
     try:
         # Parseo del body
         body = json.loads(event['body']) if isinstance(event.get('body'), str) else event.get('body', {})
-        
+
         email = body.get('email')
         nombre_restaurante = body.get('nombre_restaurante')
         password = body.get('password')
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
         distrito = body.get('distrito')
         departamento = body.get('departamento')
         telefono = body.get('telefono')
-        
+
         # Validación de campos requeridos
         if not email or not nombre_restaurante or not password or not direccion or not distrito or not departamento or not telefono:
             return {
@@ -44,25 +44,24 @@ def lambda_handler(event, context):
                 'headers': cors_headers,
                 'body': json.dumps({'error': 'Todos los campos son requeridos'})
             }
-        
-        # Verificar si el restaurante ya está registrado usando el índice EmailIndex
-        response = table.query(
-            IndexName='EmailIndex',  # Indicamos que vamos a usar el GSI
-            KeyConditionExpression=boto3.dynamodb.conditions.Key('email').eq(email)
+
+        # Verificar si el restaurante ya está registrado usando 'email' directamente
+        response = table.scan(
+            FilterExpression=boto3.dynamodb.conditions.Attr('email').eq(email)
         )
-        
+
         if response['Items']:  # Si hay elementos en la respuesta, significa que el restaurante ya está registrado
             return {
                 'statusCode': 409,
                 'headers': cors_headers,
                 'body': json.dumps({'error': 'El restaurante ya está registrado'})
             }
-        
+
         # Crear un nuevo restaurante
         restaurant_id = str(uuid.uuid4())  # Generamos un ID único para el restaurante
         hashed_password = hash_password(password)  # Hasheamos la contraseña
         token = generate_simple_token()  # Generamos un token único
-        
+
         # Guardar el restaurante en la tabla de DynamoDB
         table.put_item(
             Item={
@@ -78,7 +77,7 @@ def lambda_handler(event, context):
                 'created_at': datetime.utcnow().isoformat()
             }
         )
-        
+
         # Responder con el éxito de la operación
         return {
             'statusCode': 201,
@@ -93,7 +92,7 @@ def lambda_handler(event, context):
                 }
             })
         }
-    
+
     except Exception as e:
         print(f"Error en Registro: {str(e)}")
         return {
