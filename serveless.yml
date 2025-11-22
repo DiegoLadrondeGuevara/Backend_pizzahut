@@ -72,6 +72,23 @@ functions:
           method: get
           cors: true
 
+  # Funciones HTTP para restaurantes
+  registerRestaurant:
+    handler: src/register_restaurant.lambda_handler
+    events:
+      - http:
+          path: /restaurantes/register
+          method: post
+          cors: true
+
+  loginRestaurant:
+    handler: src/login_restaurant.lambda_handler
+    events:
+      - http:
+          path: /restaurantes/login
+          method: post
+          cors: true
+
   # Funciones WebSocket para notificar a clientes y restaurantes en tiempo real
   onConnect:
     handler: src/on_connect.lambda_handler
@@ -81,6 +98,18 @@ functions:
 
   onDisconnect:
     handler: src/on_disconnect.lambda_handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  onConnectRestaurant:
+    handler: src/on_connect_restaurant.lambda_handler
+    events:
+      - websocket:
+          route: $connect
+
+  onDisconnectRestaurant:
+    handler: src/on_disconnect_restaurant.lambda_handler
     events:
       - websocket:
           route: $disconnect

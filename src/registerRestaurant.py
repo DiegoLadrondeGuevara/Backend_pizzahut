@@ -31,12 +31,16 @@ def lambda_handler(event, context):
         email = body.get('email')
         nombre_restaurante = body.get('nombre_restaurante')
         password = body.get('password')
+        direccion = body.get('direccion')
+        distrito = body.get('distrito')
+        departamento = body.get('departamento')
+        telefono = body.get('telefono')
         
-        if not email or not nombre_restaurante or not password:
+        if not email or not nombre_restaurante or not password or not direccion or not distrito or not departamento or not telefono:
             return {
                 'statusCode': 400,
                 'headers': cors_headers,
-                'body': json.dumps({'error': 'Email, nombre del restaurante y contraseña son requeridos'})
+                'body': json.dumps({'error': 'Todos los campos son requeridos'})
             }
         
         # Verificar si el restaurante ya está registrado
@@ -59,6 +63,10 @@ def lambda_handler(event, context):
                 'restaurant_id': restaurant_id,
                 'email': email,
                 'nombre_restaurante': nombre_restaurante,
+                'direccion': direccion,
+                'distrito': distrito,
+                'departamento': departamento,
+                'telefono': telefono,
                 'password': hashed_password,
                 'token': token,
                 'created_at': datetime.utcnow().isoformat()
