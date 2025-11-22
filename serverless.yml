@@ -106,7 +106,7 @@ functions:
           path: /pedidos/{pedido_id}/estado
           method: put
           cors: true
-
+          timeout: 60
 # --- Nombres Personalizados (Custom) ---
 custom:
   usersTableName:
@@ -228,16 +228,17 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    RestaurantesTable:  # Nueva tabla para Restaurantes sin índices secundarios
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
-        AttributeDefinitions:
-          - AttributeName: restaurant_id
-            AttributeType: S
-          - AttributeName: email
-            AttributeType: S  # Se mapea 'email' como un String
-        KeySchema:
-          - AttributeName: restaurant_id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+RestaurantesTable:  # Nueva tabla para Restaurantes sin índices secundarios
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
+    AttributeDefinitions:
+      - AttributeName: restaurant_id
+        AttributeType: S  # Define la clave primaria como 'restaurant_id' (string)
+      - AttributeName: email
+        AttributeType: S  # Asegúrate de que el 'email' esté definido como un atributo normal
+    KeySchema:
+      - AttributeName: restaurant_id
+        KeyType: HASH  # Usamos 'restaurant_id' como la clave primaria (HASH key)
+    BillingMode: PAY_PER_REQUEST
+
