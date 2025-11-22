@@ -195,3 +195,26 @@ Esta tabla almacena las conexiones activas de los clientes que están conectados
 
 * **GSI** con `user_id` como partition key para obtener todas las conexiones de un usuario específico.
 
+
+ndpoints:
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/logs
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/pedidos
+  GET - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/pedidos/{pedido_id}/estado
+  GET - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/pedidos/activos
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/login
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/register
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/restaurantes/register
+  POST - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/restaurantes/login
+  PUT - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/pedidos/{pedido_id}/estado
+  PUT - https://8wqnmk44tl.execute-api.us-east-1.amazonaws.com/dev/pedidos/{pedido_id}/estado
+functions:
+  createLog: api-gestion-pedidos-dev-createLog (1.9 MB)
+  createPedido: api-gestion-pedidos-dev-createPedido (1.9 MB)
+  getEstadoPedido: api-gestion-pedidos-dev-getEstadoPedido (1.9 MB)
+  listPedidosActivos: api-gestion-pedidos-dev-listPedidosActivos (1.9 MB)
+  login: api-gestion-pedidos-dev-login (1.9 MB)
+  register: api-gestion-pedidos-dev-register (1.9 MB)
+  registerRestaurant: api-gestion-pedidos-dev-registerRestaurant (1.9 MB)
+  loginRestaurant: api-gestion-pedidos-dev-loginRestaurant (1.9 MB)
+  notifyPedidoEstado: api-gestion-pedidos-dev-notifyPedidoEstado (1.9 MB)
+  updateEstadoPedido: api-gestion-pedidos-dev-updateEstadoPedido (1.9 MB)
