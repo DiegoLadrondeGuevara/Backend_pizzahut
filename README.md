@@ -1,7 +1,3 @@
-Claro, a continuación te proporciono el **README actualizado** con los cambios solicitados para incluir la **dirección del restaurante**, **distrito**, **departamento** y **número de teléfono**. También, he actualizado la **función `registerRestaurant`** para reflejar estos nuevos atributos.
-
----
-
 # **README: Estructura de Base de Datos para Sistema de Pedidos (DynamoDB)**
 
 Este documento describe la estructura de la base de datos diseñada para un sistema de pedidos en línea (similar a Pizza Hut) utilizando **DynamoDB** como base de datos NoSQL. La estructura está optimizada para consultas rápidas, escalabilidad y facilidad de mantenimiento, y soporta tanto operaciones REST tradicionales como actualizaciones en tiempo real usando WebSockets.
