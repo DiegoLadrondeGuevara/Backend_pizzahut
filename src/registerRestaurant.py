@@ -45,9 +45,13 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Todos los campos son requeridos'})
             }
         
-        # Verificar si el restaurante ya está registrado usando 'email'
-        response = table.get_item(Key={'email': email})  # Utilizando 'email' para buscar el restaurante
-        if 'Item' in response:
+        # Verificar si el restaurante ya está registrado usando el índice EmailIndex
+        response = table.query(
+            IndexName='EmailIndex',  # Indicamos que vamos a usar el GSI
+            KeyConditionExpression=boto3.dynamodb.conditions.Key('email').eq(email)
+        )
+        
+        if response['Items']:  # Si hay elementos en la respuesta, significa que el restaurante ya está registrado
             return {
                 'statusCode': 409,
                 'headers': cors_headers,
