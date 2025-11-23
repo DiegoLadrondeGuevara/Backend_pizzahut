@@ -2,11 +2,17 @@ import json
 import boto3
 import hashlib
 import os
+from boto3.dynamodb.conditions import Key # Importar para usar en Query
 
 # Lee el nombre de la tabla de DynamoDB de las variables de entorno
 DYNAMODB_TABLE_RESTAURANTES = os.environ.get('DYNAMODB_TABLE_RESTAURANTES', 'RestaurantesTable')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(DYNAMODB_TABLE_RESTAURANTES)
+
+# --- CONFIGURACIÓN REQUERIDA ---
+# ⚠️ IMPORTANTE: Debes reemplazar 'EmailIndex' con el nombre de tu Índice Secundario Global real.
+# Este índice debe tener 'email' como su clave de partición.
+GSI_EMAIL_NAME = 'EmailIndex' 
 
 def hash_password(password):
     """Hashea la contraseña usando SHA-256"""
@@ -15,7 +21,7 @@ def hash_password(password):
 def lambda_handler(event, context):
     cors_headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'  # Permitir acceso desde cualquier origen
+        'Access-Control-Allow-Origin': '*'
     }
     
     try:
@@ -31,16 +37,22 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'Email y contraseña son requeridos'})
             }
         
-        # Buscar restaurante en DynamoDB usando 'email' como clave
-        response = table.get_item(Key={'email': email})
-        if 'Item' not in response:
+        # 🔑 CAMBIO CLAVE: Usamos table.query con un GSI basado en email
+        response = table.query(
+            IndexName=GSI_EMAIL_NAME,
+            KeyConditionExpression=Key('email').eq(email)
+        )
+        
+        # El resultado de Query está en 'Items', que es una lista.
+        if not response['Items']:
             return {
                 'statusCode': 401,
                 'headers': cors_headers,
                 'body': json.dumps({'error': 'Credenciales inválidas'})
             }
         
-        restaurant = response['Item']
+        # Si se encuentra, toma el primer (y único) restaurante.
+        restaurant = response['Items'][0]
         
         # Verificar contraseña
         hashed_password = hash_password(password)

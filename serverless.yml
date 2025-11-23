@@ -17,7 +17,7 @@ provider:
     DYNAMODB_TABLE_ESTADOS: ${self:custom.estadoPedidosTableName.${self:provider.stage}}
     DYNAMODB_TABLE_LOGS: ${self:custom.logsTableName.${self:provider.stage}}
     DYNAMODB_TABLE_CONNECTIONS: ${self:custom.connectionsTableName.${self:provider.stage}}
-    DYNAMODB_TABLE_RESTAURANTES: ${self:custom.restaurantesTableName.${self:provider.stage}}  # Nueva tabla de Restaurantes
+    DYNAMODB_TABLE_RESTAURANTES: ${self:custom.restaurantesTableName.${self:provider.stage}} 
     STAGE: ${self:provider.stage}
 
 # --- Funciones Lambda ---
@@ -141,7 +141,7 @@ custom:
     prod: ${self:service}-prod-connections
 
   restaurantesTableName:
-    dev: ${self:service}-dev-restaurantes   # Nueva tabla para Restaurantes
+    dev: ${self:service}-dev-restaurantes 
     test: ${self:service}-test-restaurantes
     prod: ${self:service}-prod-restaurantes
 
@@ -229,14 +229,14 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    RestaurantesTable:  # Nueva tabla para Restaurantes sin índices secundarios
+    RestaurantesTable: 
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.restaurantesTableName.${self:provider.stage}}
         AttributeDefinitions:
           - AttributeName: restaurant_id
-            AttributeType: S  # Define la clave primaria como 'restaurant_id' (string)
+            AttributeType: S 
         KeySchema:
           - AttributeName: restaurant_id
-            KeyType: HASH  # Usamos 'restaurant_id' como la clave primaria (HASH key)
+            KeyType: HASH 
         BillingMode: PAY_PER_REQUEST
