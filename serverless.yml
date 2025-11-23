@@ -236,8 +236,6 @@ resources:
         AttributeDefinitions:
           - AttributeName: restaurant_id
             AttributeType: S  # Define la clave primaria como 'restaurant_id' (string)
-          - AttributeName: email
-            AttributeType: S  # Asegúrate de que el 'email' esté definido como un atributo normal
         KeySchema:
           - AttributeName: restaurant_id
             KeyType: HASH  # Usamos 'restaurant_id' como la clave primaria (HASH key)
